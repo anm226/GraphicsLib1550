@@ -1,6 +1,7 @@
-//Andrew Masih
-//anm226@pitt.edu
-//Project 1: Graphics Library
+/*Name: Andrew Masih
+ *Email: anm226@pitt.edu
+ *Project 1: Graphics Library
+ */
 #include <stdio.h>
 #include <stdlib.h>
 #include <fcntl.h>
@@ -18,6 +19,8 @@ int *mapped_file;
 int file_size;
 
 typedef unsigned short color_t;
+
+
 int init_graphics(){
 
   /* Open frame buffer device to read
@@ -66,6 +69,10 @@ int init_graphics(){
   }
 
 }
+
+/*Close all opened files, and enable
+ *all the disabled functions
+ */
 int exit_graphics(){
   struct termios current;
   ret = ioctl(0, TCGETS, &current);
@@ -92,7 +99,7 @@ int exit_graphics(){
 }
 
 int clear_screen(){
-
+ const char msg[] = "\\033[2J";
 
 }
 

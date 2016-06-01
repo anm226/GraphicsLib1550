@@ -10,6 +10,7 @@
 #include <sys/mman.h>
 #include <linux/fb.h>
 #include <termios.h>
+#include <sys/select.h>
 
 #define DEVICE "/dev/fb0"
 
@@ -100,7 +101,7 @@ int exit_graphics(){
 
 int clear_screen(){
  const char msg[] = "\\033[2J";
-
+ write(STDOUT_FILENO, msg, sizeof(msg)-1); //write out the string to clear screen!
 }
 
 int getkey(){

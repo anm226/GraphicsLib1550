@@ -1,4 +1,4 @@
 List problems I'm running into:
   1. don't quite understand the 16 bit color mapping!
   2. don't understand how mmap works!
-  3. 
+  3.

@@ -11,6 +11,8 @@
 #include <linux/fb.h>
 #include <termios.h>
 #include <sys/select.h>
+#include <time.h>
+#include <iso_font.h>
 
 #define DEVICE "/dev/fb0"
 
@@ -18,7 +20,8 @@ int fd;
 int ret;
 int *mapped_file;
 int file_size;
-
+struct fb_var_screeninfo info_about_virtual;
+struct fb_fix_screeninfo bit_depth_info;
 typedef unsigned short color_t;
 
 
@@ -26,8 +29,9 @@ int main(){
 
   init_graphics();
 
-  draw_pixel();
+  //draw_pixel(100,100);
 
+  draw_rect(100,100, 20, 20);
   exit_graphics();
 
 
@@ -43,7 +47,6 @@ int init_graphics(){
 	    exit(EXIT_FAILURE);
     }
   //get resolution info for mapped_file size
-  struct fb_var_screeninfo info_about_virtual;
   ret = ioctl(fd, FBIOGET_VSCREENINFO, &info_about_virtual);
   if(ret == -1){
       perror("Encountered error trying to get virtual resolution!");
@@ -51,7 +54,6 @@ int init_graphics(){
   }
   printf("This is screen info: %d", info_about_virtual.yres_virtual);
   //get screen infor for mapped_file size
-  struct fb_fix_screeninfo bit_depth_info;
   ret = ioctl(fd, FBIOGET_FSCREENINFO, &bit_depth_info);
   if(ret == -1){
     perror("Encountered error trying to get fix screen info!");
@@ -62,7 +64,7 @@ int init_graphics(){
   file_size = (info_about_virtual.yres_virtual)*(bit_depth_info.line_length);
   //map the file to address space
   mapped_file = mmap(0, file_size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
-
+  printf("yres %d", info_about_virtual.yres_virtual);
   //disable keypress echo and buffering keypresses using ioctl
   struct termios termOld;
   ret = ioctl(0,TCGETS,&termOld);
@@ -142,16 +144,36 @@ int clear_screen(){
 
 
 
-int sleep_ms(){
-
+int sleep_ms(long ms){
+  struct timespec t;
+  t.tv_nsec = ms * 1000000;
+  if(nanosleep(&t, NULL)==-1){
+    perror("Nanosleep faliure!");
+    exit(EXIT_FAILURE);
+  }
 
 }
-int draw_pixel(){
-  *(mapped_file + 25 + 5) = 255;
+int draw_pixel(int x, int y){
+  int scaleLocation = 640*y + x;
+  *(mapped_file + scaleLocation) = 255;
+  //*(mapped_file + y + 25) = 255;
 }
 
-int draw_rect(){
+int draw_rect(int x, int y, int width, int height){
+  int i;
 
+  for(i = 0; i<width; i++){
+    draw_pixel(x+i, y);
+  }
+  for(i = 0; i<height; i++){
+    draw_pixel(x, y+i);
+  }
+  for(i=0; i<width; i++){
+    draw_pixel(x+i, y+height);
+  }
+  for(i=0; i<=height; i++){
+    draw_pixel(x+width, y+i);
+  }
 
 }
 int draw_text(){
